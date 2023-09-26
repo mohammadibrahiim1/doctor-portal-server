@@ -2,16 +2,14 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-
 const app = express();
 const port = process.env.PORT || 5000;
-// Ylp5Tu7cuCdP2mjY
-// doctor-portal
+
 // Enable CORS
 app.use(cors());
 
 // Connect to MongoDB
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wuwpwwx.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -26,11 +24,58 @@ const client = new MongoClient(uri, {
 async function run() {
   const db = client.db("doctorsPortal");
   const appointmentsCollection = db.collection("appointmentOptions");
+  const servicesCollection = db.collection("services");
+  const doctorsCollection = db.collection("doctors");
+  const articlesCollection = db.collection("articles");
   try {
     app.get(`/api/v1/appointments`, async (req, res) => {
       const cursor = appointmentsCollection.find({});
       const result = await cursor.toArray();
       res.send({ status: true, items: result.length, data: result });
+    });
+
+    // get all doctors
+    app.get(`/api/v1/doctors`, async (req, res) => {
+      const cursor = doctorsCollection.find({});
+      const result = await cursor.toArray();
+      res.send({ status: true, items: result.length, data: result });
+    });
+
+    // get  doctor by id
+    app.get(`/api/v1/doctor/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await doctorsCollection.findOne(query);
+      res.send({ status: true, data: result });
+    });
+
+    // get services data
+    app.get(`/api/v1/services`, async (req, res) => {
+      const cursor = servicesCollection.find({});
+      const result = await cursor.toArray();
+      res.send({ status: true, items: result.length, data: result });
+    });
+
+    // get service by id
+    app.get(`/api/v1/service/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await servicesCollection.findOne(query);
+      res.send({ status: true, data: result });
+    });
+
+    // get articles data
+    app.get(`/api/v1/articles`, async (req, res) => {
+      const cursor = articlesCollection.find({});
+      const result = await cursor.toArray();
+      res.send({ status: true, items: result.length, data: result });
+    });
+    // get articles data by id
+    app.get(`/api/v1/article/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await articlesCollection.findOne(query);
+      res.send({ status: true, data: result });
     });
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
