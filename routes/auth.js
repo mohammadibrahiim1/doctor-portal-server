@@ -42,12 +42,20 @@ router.get('/google/callback', passport.authenticate('google', {
 
 
 // facebook authenticate
-router.get('/facebook', passport.authenticate('facebook', { scope: ['profile'] }));
+router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 
-router.get('/facebook/callback', passport.authenticate('facebook', {
+router.get('/auth/facebook/callback', passport.authenticate('facebook', {
     successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed'
 }));
+
+router.get('/profile', (req, res) => {
+    res.send(`You are a valid user`)
+});
+
+router.get('/login/failed', (req, res) => {
+    res.send(`You are a non valid user`)
+})
 
 
 module.exports = router

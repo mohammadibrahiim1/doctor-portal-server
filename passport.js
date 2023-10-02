@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
+// const user = require('')
 
 
 const GOOGLE_CLIENT_ID = '275694306890-01pl0egnr7ul49mn08q5ddq4o0en6513.apps.googleusercontent.com';
@@ -15,7 +16,17 @@ passport.use(new GoogleStrategy({
     clientSecret: GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/callback"
 },
-    function (accessToken, refreshToken, profile, done) {
+
+    async (accessToken, refreshToken, profile, done) => {
+        const defaultUser = {
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            photoURL: profile.photos[0].value,
+            googleId: profile.id
+
+        }
+
+        const user = 
         done(null, profile);
     }
 ));
@@ -24,11 +35,21 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: FACEBOOK_APP_ID,
     clientSecret: FACEBOOK_APP_SECRET,
-    callbackURL: '/auth/facebook/callback'
+    callbackURL: 'http://localhost:5000/auth/facebook/callback',
+    profileFields: [
+        'id', 'displayName', 'name', 'gender', 'email', 'photoURL'
+    ]
 },
 
     function (accessToken, refreshToken, profile, done) {
-        done(null, profile)
+        console.log(profile);
+        new User({
+            userName: profile.displayName,
+            facebookId: profile.id
+        }).save().then((newUser) => {
+            console.log("new user created:" + newUser);
+        })
+        return done(null, profile);
     }
 ))
 
@@ -37,4 +58,4 @@ passport.serializeUser((user, done) => {
 })
 passport.deserializeUser((user, done) => {
     done(null, user)
-})
+})  
